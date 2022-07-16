@@ -1,4 +1,4 @@
-package com.tantofaz.exceptions
+package com.newbank.exceptions
 
 class EnumNotFoundException : Exception {
     constructor () : super("Enum not found")

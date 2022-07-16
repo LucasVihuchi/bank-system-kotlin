@@ -1,8 +1,8 @@
-package com.tantofaz.entities
+package com.newbank.entities
 
-import com.tantofaz.enums.Agency
-import com.tantofaz.enums.Position
-import com.tantofaz.interfaces.EmployeeAttributes
+import com.newbank.enums.Agency
+import com.newbank.enums.Position
+import com.newbank.interfaces.EmployeeAttributes
 
 class Manager(name: String, cpf: String, password: String, var agency: Agency) :  Employee(name, cpf, password){
 

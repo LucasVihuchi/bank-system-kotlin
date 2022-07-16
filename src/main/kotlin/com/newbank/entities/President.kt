@@ -1,7 +1,7 @@
-package com.tantofaz.entities
+package com.newbank.entities
 
-import com.tantofaz.enums.Position
-import com.tantofaz.interfaces.EmployeeAttributes
+import com.newbank.enums.Position
+import com.newbank.interfaces.EmployeeAttributes
 
 class President(name: String, cpf: String, password: String): Employee(name, cpf, password) {
 

@@ -1,6 +1,6 @@
-package com.tantofaz.utils
+package com.newbank.utils
 
-import com.tantofaz.exceptions.IncorrectInfoException
+import com.newbank.exceptions.IncorrectInfoException
 
 class Validators {
 

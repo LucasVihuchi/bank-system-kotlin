@@ -1,4 +1,4 @@
-package com.tantofaz.exceptions
+package com.newbank.exceptions
 
 class UnauthorizedException : Exception {
     constructor () : super("User unauthorized")

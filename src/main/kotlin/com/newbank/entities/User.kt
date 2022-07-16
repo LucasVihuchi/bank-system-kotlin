@@ -1,8 +1,8 @@
-package com.tantofaz.entities
+package com.newbank.entities
 
-import com.tantofaz.utils.Validators.Companion.validateCpf
-import com.tantofaz.exceptions.IncorrectInfoException
-import com.tantofaz.exceptions.UnauthorizedException
+import com.newbank.utils.Validators.Companion.validateCpf
+import com.newbank.exceptions.IncorrectInfoException
+import com.newbank.exceptions.UnauthorizedException
 
 abstract class User(var name: String, cpf: String, private var password: String) {
     val cpf: String = if (validateCpf(cpf)) cpf else throw IncorrectInfoException()

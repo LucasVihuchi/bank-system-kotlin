@@ -1,4 +1,4 @@
-package com.tantofaz.exceptions
+package com.newbank.exceptions
 
 class IncorrectInfoException : Exception {
     constructor() : super("Incorrect info provided")

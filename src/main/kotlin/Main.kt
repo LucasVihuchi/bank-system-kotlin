@@ -1,4 +1,4 @@
-import com.tantofaz.entities.User
+import com.newbank.entities.User
 
 fun main() {
     var usuario: User = User("asfas", "asgas","assaf")

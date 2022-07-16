@@ -1,6 +1,6 @@
-package com.tantofaz.enums
+package com.newbank.enums
 
-import com.tantofaz.exceptions.EnumNotFoundException
+import com.newbank.exceptions.EnumNotFoundException
 
 enum class Position(val id: Int, val friendlyName: String) {
     MANAGER(1, "Manager"),

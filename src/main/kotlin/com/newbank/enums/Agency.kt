@@ -1,6 +1,6 @@
-package com.tantofaz.enums
+package com.newbank.enums
 
-import com.tantofaz.exceptions.EnumNotFoundException
+import com.newbank.exceptions.EnumNotFoundException
 
 enum class Agency(val id: Int, val friendlyName: String) {
     A0001(1, "A0001"),
