@@ -13,4 +13,10 @@ abstract class User(var name: String, cpf: String, private var password: String)
         }
         this.password = newPassword
     }
+
+    fun login(providedPassword: String) {
+        if(this.password != providedPassword) {
+            throw UnauthorizedException()
+        }
+    }
 }

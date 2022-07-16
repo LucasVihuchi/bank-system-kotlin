@@ -1,6 +1,6 @@
 import com.newbank.entities.User
 
 fun main() {
-    var usuario: User = User("asfas", "asgas","assaf")
+    // We'll fix that later
     print("Let's get it on")
 }
