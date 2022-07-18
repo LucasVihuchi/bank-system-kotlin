@@ -1,4 +1,4 @@
-package com.newbank.entities
+package com.newbank.entities.users
 
 import com.newbank.enums.Agency
 import com.newbank.enums.Position

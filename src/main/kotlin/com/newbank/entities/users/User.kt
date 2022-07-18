@@ -1,4 +1,4 @@
-package com.newbank.entities
+package com.newbank.entities.users
 
 import com.newbank.utils.Validators.Companion.validateCpf
 import com.newbank.exceptions.IncorrectInfoException
