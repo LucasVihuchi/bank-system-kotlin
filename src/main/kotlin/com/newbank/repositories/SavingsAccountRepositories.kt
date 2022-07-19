@@ -1,6 +1,7 @@
 package com.newbank.repositories
 
 import com.newbank.entities.accounts.SavingsAccount
+import com.newbank.enums.Agency
 import com.newbank.exceptions.ExistentEntityException
 import com.newbank.exceptions.NonExistentEntityException
 
@@ -30,6 +31,9 @@ object SavingsAccountRepositories {
     }
 
     fun accountsLoader() {
-        TODO("Implement later")
+        addAccount(SavingsAccount("93465029089", Agency.A0001))
+        addAccount(SavingsAccount("43643733038", Agency.A0002))
+        addAccount(SavingsAccount("80930608046", Agency.A0001))
+        addAccount(SavingsAccount("12848534036", Agency.A0002))
     }
 }

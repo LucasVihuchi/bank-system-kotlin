@@ -4,13 +4,12 @@ class Validators {
 
     companion object {
         fun validateCpf(cpf: String?): Boolean {
-            if (cpf !is String || cpf.matches("^[0-9]{11}\$".toRegex())) {
+            if (cpf !is String || !cpf.matches("^[0-9]{11}\$".toRegex())) {
                 return false
             }
 
             val digits: Array<Int> = Array(11, { i -> cpf[i].digitToInt() })
             var areCharactersEqual: Boolean = true
-            var index = 0
             for (index in 0 until 11) {
                 if (index > 0) {
                     if (digits[index] != digits[index - 1]) {
