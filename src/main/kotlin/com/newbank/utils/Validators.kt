@@ -47,5 +47,9 @@ class Validators {
 
             return true
         }
+
+        fun validatePassword(password: String?): Boolean {
+            return password is String && password.length >= 5
+        }
     }
 }
