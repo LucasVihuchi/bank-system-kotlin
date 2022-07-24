@@ -9,7 +9,7 @@ import java.time.LocalDate
 class SavingsAccount(cpfOwner: String, agency: Agency, accountBirth: Int = -1): Account(cpfOwner, agency) {
 
     var accountBirth: Int = accountBirth
-        private set
+        internal set
 
     override fun deposit(amount: Double) {
         super.deposit(amount)

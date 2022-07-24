@@ -26,7 +26,7 @@ object SavingsAccountRepositories {
         return accountsMap[cpf]!!
     }
 
-    fun getAccount(): List<SavingsAccount> {
+    fun getAccounts(): List<SavingsAccount> {
         return ArrayList<SavingsAccount>(accountsMap.values)
     }
 

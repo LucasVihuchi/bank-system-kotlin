@@ -26,7 +26,7 @@ object CheckingAccountRepositories {
         return accountsMap[cpf]!!
     }
 
-    fun getAccount(): List<CheckingAccount> {
+    fun getAccounts(): List<CheckingAccount> {
         return ArrayList<CheckingAccount>(accountsMap.values)
     }
 
