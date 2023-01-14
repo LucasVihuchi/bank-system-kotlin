@@ -1,5 +1,6 @@
 package com.newbank.utils
 
+import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import printStandardInputErrorMessage
 import java.util.*
 
@@ -7,7 +8,7 @@ object Readers {
     fun readStringInput(message: String): String {
         while (true) {
             print(message)
-            val userInput: String? = readLine()
+            val userInput: String? = readlnOrNull()
             if (userInput is String && userInput != "") {
                 return userInput
             }
@@ -59,6 +60,42 @@ object Readers {
             }
             printStandardInputErrorMessage()
         }
+    }
+
+    fun readCpf(maxInputTries: Int = 3): String? {
+        var cpfInputTries = 1
+        var cpf: String
+        do {
+            cpf = readStringInput("Insert your cpf: ")
+            if (Validators.validateCpf(cpf)) {
+                break
+            }
+            if (cpfInputTries >= maxInputTries) {
+                printErrorMessage("Invalid cpf provided $maxInputTries times. Returning to previous menu...")
+                return null
+            }
+            printErrorMessage("Invalid cpf provided")
+            cpfInputTries++
+        } while (true)
+        return cpf
+    }
+
+    fun readPassword(maxInputTries: Int = 3): String? {
+        var passwordInputTries = 1
+        var password: String
+        do {
+            password = Readers.readStringInput("Insert your password: ")
+            if (Validators.validatePassword(password)) {
+                break
+            }
+            if (passwordInputTries >= maxInputTries) {
+                printErrorMessage("Invalid password provided $maxInputTries times. Returning to previous menu...")
+                return null
+            }
+            printErrorMessage("Invalid password provided")
+            passwordInputTries++
+        } while (true)
+        return password
     }
 
 }

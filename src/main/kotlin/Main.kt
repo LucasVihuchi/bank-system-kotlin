@@ -2,11 +2,17 @@ import com.newbank.entities.accounts.Account
 import com.newbank.entities.accounts.CheckingAccount
 import com.newbank.entities.accounts.SavingsAccount
 import com.newbank.entities.users.*
+import com.newbank.enums.AccountOperation
 import com.newbank.enums.AccountType
 import com.newbank.exceptions.*
+import com.newbank.interfaces.DirectorOperations
+import com.newbank.interfaces.ManagerOperations
 import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories
 import com.newbank.repositories.UserRepositories
+import com.newbank.utils.ExceptionHandlers
+import com.newbank.utils.ExceptionHandlers.printCustomExceptionMessage
+import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import com.newbank.utils.Readers
 import com.newbank.utils.Validators
 import kotlin.system.exitProcess
@@ -47,28 +53,18 @@ fun registerNewAccount() {
 
 fun initializeATM(user: User) {
     while (true) {
-        val selectedOption: Int = Readers.readOptionsInput("Checking account", "Savings account", message = "Choose which type of account you want:")
+        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), "Choose which type of account you want:")
         handleAccountSelectionMenu(selectedOption, user)
     }
 }
 
 fun handleAccountSelectionMenu(option: Int, user: User) {
-    when(option) {
+    val accountType: AccountType = when(option) {
         1 -> {
-            val account: Account? = getAccount(user.cpf, AccountType.CHECKING)
-            if (account == null) {
-                printErrorMessage("Checking account not found")
-                return
-            }
-            handleInitialMainMenu(account, user)
+            AccountType.CHECKING
         }
         2 -> {
-            val account: Account? = getAccount(user.cpf, AccountType.SAVINGS)
-            if (account == null) {
-                printErrorMessage("Savings account not found")
-                return
-            }
-            handleInitialMainMenu(account, user)
+            AccountType.CHECKING
         }
         0 -> {
             exitProcess(0)
@@ -77,6 +73,13 @@ fun handleAccountSelectionMenu(option: Int, user: User) {
             printErrorMessage("Invalid value provided. Returning to the beginning...")
             return
         }
+    }
+    val account: Account? = getAccount(user.cpf, accountType)
+    account?.also {
+        handleInitialMainMenu(account, user)
+    } ?: run {
+        printErrorMessage("${accountType.friendlyName} account not found")
+        return
     }
 }
 
@@ -111,59 +114,40 @@ fun handleInitialMainMenu(account: Account, user: User) {
 
 }
 
+fun handleOperation(operation: AccountOperation, account: Account, recipientAccountType: AccountType = AccountType.CHECKING, recipientCpf: String = "") {
+    val handledValue: Double = Readers.readDoubleInput("Insert the value to be ${operation.pastParticipleTense}:")
+    try {
+        when (operation) {
+            AccountOperation.WITHDRAW -> {
+                account.withdraw(handledValue)
+            }
+            AccountOperation.DEPOSIT -> {
+                account.deposit(handledValue)
+            }
+            AccountOperation.TRANSFER -> {
+                account.transfer(handledValue, recipientCpf, recipientAccountType)
+            }
+        }
+        println("\nThe value R$ ${String.format("%.2f", handledValue)} was ${operation.pastParticipleTense} successfully!\n")
+    } catch (e: InsufficientBalanceException) {
+        printCustomExceptionMessage(e)
+    } catch (e: NegativeValueException) {
+        printCustomExceptionMessage(e)
+    }
+}
+
 fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOption: Int) {
     when(selectedOption) {
         1 -> {
-            val withdrawValue: Double = Readers.readDoubleInput("Insert the value to be withdrawn:")
-            try {
-                account.withdraw(withdrawValue)
-                println("\nThe value R$ ${String.format("%.2f", withdrawValue)} was withdrawn successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.WITHDRAW, account)
         }
         2 -> {
-            val depositValue: Double = Readers.readDoubleInput("Insert the value to be deposited:")
-            try {
-                account.deposit(depositValue)
-                println("\nThe value R$ ${String.format("%.2f", depositValue)} was deposited successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.DEPOSIT, account)
         }
         3 -> {
-            var recipientCpf: String
-            var cpfInputTries: Int = 1
-            while (true) {
-                recipientCpf = Readers.readStringInput("Insert de recipient's cpf: ")
-                if (Validators.validateCpf(recipientCpf)) {
-                    break
-                }
-                if (cpfInputTries >= 3) {
-                    printErrorMessage("Invalid cpf provided 3 times. Returning to previous menu...")
-                    return
-                }
-                printErrorMessage("Invalid cpf provided")
-                cpfInputTries++
-            }
+            val recipientCpf: String = Readers.readCpf() ?: return
 
-            val accountTypeOption: Int = Readers.readOptionsInput("Checking account", "Savings account", showZero = false)
+            val accountTypeOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), showZero = false)
             val accountType: AccountType
             try {
                 accountType = AccountType.getById(accountTypeOption)
@@ -174,22 +158,7 @@ fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOp
                 return
             }
 
-            val transferValue: Double = Readers.readDoubleInput("Insert the value to be transfered:")
-
-            try {
-                account.transfer(transferValue, recipientCpf, accountType)
-                println("\nThe value R$ ${String.format("%.2f", transferValue)} was transfered to '${recipientCpf}' successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.TRANSFER, account, accountType, recipientCpf)
         }
         4 -> {
             account.printBalance()
@@ -201,33 +170,18 @@ fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOp
             TODO("Life insurance")
         }
         7 -> {
-            when(user) {
-                is Manager -> {
-                    user.generateAccountNumberReport()
-                }
-                is Director -> {
-                    user.generateAccountNumberReport()
-                }
-                is President -> {
-                    user.generateAccountNumberReport()
-                }
+            if (user is ManagerOperations) {
+                user.generateAccountNumberReport()
             }
         }
         8 -> {
-            when(user) {
-                is Director -> {
-                    user.generateBankCustomerReport()
-                }
-                is President -> {
-                    user.generateBankStockReport()
-                }
+            if (user is DirectorOperations) {
+                user.generateBankCustomerReport()
             }
         }
         9 -> {
-            when(user) {
-                is President -> {
-                    user.generateBankStockReport()
-                }
+            if (user is President) {
+                user.generateBankStockReport()
             }
         }
         0 -> {
@@ -243,54 +197,13 @@ fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOp
 fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOption: Int) {
     when(selectedOption) {
         1 -> {
-            val withdrawValue: Double = Readers.readDoubleInput("Insert the value to be withdrawn:")
-            try {
-                account.withdraw(withdrawValue)
-                println("\nThe value R$ ${String.format("%.2f", withdrawValue)} was withdrawn successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.WITHDRAW, account)
         }
         2 -> {
-            val depositValue: Double = Readers.readDoubleInput("Insert the value to be deposited:")
-            try {
-                account.deposit(depositValue)
-                println("\nThe value R$ ${String.format("%.2f", depositValue)} was deposited successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.DEPOSIT, account)
         }
         3 -> {
-            var recipientCpf: String
-            var cpfInputTries: Int = 1
-            while (true) {
-                recipientCpf = Readers.readStringInput("Insert de recipient's cpf: ")
-                if (Validators.validateCpf(recipientCpf)) {
-                    break
-                }
-                if (cpfInputTries >= 3) {
-                    printErrorMessage("Invalid cpf provided 3 times. Returning to previous menu...")
-                    return
-                }
-                printErrorMessage("Invalid cpf provided")
-                cpfInputTries++
-            }
+            val recipientCpf: String = Readers.readCpf() ?: return
 
             val accountTypeOption: Int = Readers.readOptionsInput("Checking account", "Savings account", showZero = false)
             val accountType: AccountType
@@ -303,22 +216,7 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
                 return
             }
 
-            val transferValue: Double = Readers.readDoubleInput("Insert the value to be transfered:")
-
-            try {
-                account.transfer(transferValue, recipientCpf, accountType)
-                println("\nThe value R$ ${String.format("%.2f", transferValue)} was transfered to '${recipientCpf}' successfully!")
-            } catch (e: InsufficientBalanceException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            } catch (e: NegativeValueException) {
-                e.message?.let {
-                    printErrorMessage(it)
-                }
-                return
-            }
+            handleOperation(AccountOperation.TRANSFER, account, accountType, recipientCpf)
         }
         4 -> {
             account.printBalance()
@@ -327,33 +225,18 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
             account.generateIncomeSimulation()
         }
         6 -> {
-            when(user) {
-                is Manager -> {
-                    user.generateAccountNumberReport()
-                }
-                is Director -> {
-                    user.generateAccountNumberReport()
-                }
-                is President -> {
-                    user.generateAccountNumberReport()
-                }
+            if (user is ManagerOperations) {
+                user.generateAccountNumberReport()
             }
         }
         7 -> {
-            when(user) {
-                is Director -> {
-                    user.generateAccountNumberReport()
-                }
-                is President -> {
-                    user.generateAccountNumberReport()
-                }
+            if (user is DirectorOperations) {
+                user.generateBankCustomerReport()
             }
         }
         8 -> {
-            when(user) {
-                is President -> {
-                    user.generateAccountNumberReport()
-                }
+            if (user is President) {
+                user.generateBankStockReport()
             }
         }
         0 -> {
@@ -367,52 +250,22 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
 }
 
 fun login(): User? {
-    var cpfInputTries: Int = 1
-    var cpf: String
-    do {
-        cpf = Readers.readStringInput("Insert your cpf: ")
-        if (Validators.validateCpf(cpf)) {
-            break
-        }
-        if (cpfInputTries >= 3) {
-            printErrorMessage("Invalid cpf provided 3 times. Returning to previous menu...")
-            return null
-        }
-        printErrorMessage("Invalid cpf provided")
-        cpfInputTries++
-    } while (true)
+    val cpf: String = Readers.readCpf() ?: return null
 
-    var passwordInputTries: Int = 1
-    var password: String
-    do {
-        password = Readers.readStringInput("Insert your password: ")
-        if (Validators.validatePassword(password)) {
-            break
-        }
-        if (passwordInputTries >= 3) {
-            printErrorMessage("Invalid password provided 3 times. Returning to previous menu...")
-            return null
-        }
-        printErrorMessage("Invalid password provided")
-        passwordInputTries++
-    } while (true)
+    val password: String = Readers.readPassword() ?: return null
 
     val loggedUser: User
     try {
         loggedUser = UserRepositories.getUser(cpf)
     } catch (e: NonExistentEntityException) {
-        e.message?.let {
-            printErrorMessage(it)
-        }
+        printCustomExceptionMessage(e)
         return null
     }
 
     try {
         loggedUser.login(password)
     } catch (e: UnauthorizedException) {
-        e.message?.let {
-            printErrorMessage(it)
-        }
+        printCustomExceptionMessage(e)
         return null
     }
 
@@ -423,10 +276,6 @@ fun loadRepositories() {
     UserRepositories.usersLoader()
     CheckingAccountRepositories.accountsLoader()
     SavingsAccountRepositories.accountsLoader()
-}
-
-fun printErrorMessage(message: String) {
-    println("\n${message}\n")
 }
 
 fun printStandardInputErrorMessage() {

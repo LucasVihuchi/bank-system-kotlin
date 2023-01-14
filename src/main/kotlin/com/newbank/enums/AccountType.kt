@@ -24,5 +24,9 @@ enum class AccountType(val id: Int, val friendlyName: String) {
             }
             throw EnumNotFoundException()
         }
+
+        fun getFriendlyNames(): Array<String> {
+            return values().map { it.friendlyName }.toTypedArray()
+        }
     }
 }
