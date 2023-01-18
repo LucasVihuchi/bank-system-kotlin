@@ -1,5 +1,6 @@
 package com.newbank.utils
 
+import com.newbank.enums.Agency
 import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import printStandardInputErrorMessage
 import java.util.*
@@ -62,40 +63,43 @@ object Readers {
         }
     }
 
-    fun readCpf(maxInputTries: Int = 3): String? {
-        var cpfInputTries = 1
-        var cpf: String
+    private fun readUserInfo(maxInputTries: Int = 3, fieldName: String, validationFn: (String) -> Boolean): String? {
+        var inputTries = 1
+        var field: String
         do {
-            cpf = readStringInput("Insert your cpf: ")
-            if (Validators.validateCpf(cpf)) {
+            field = readStringInput("Insert the $fieldName: ")
+            if (validationFn(field)) {
                 break
             }
-            if (cpfInputTries >= maxInputTries) {
-                printErrorMessage("Invalid cpf provided $maxInputTries times. Returning to previous menu...")
+            if (inputTries >= maxInputTries) {
+                printErrorMessage("Invalid $fieldName provided $maxInputTries times. Returning to previous menu...")
                 return null
             }
-            printErrorMessage("Invalid cpf provided")
-            cpfInputTries++
+            printErrorMessage("Invalid $fieldName provided")
+            inputTries++
         } while (true)
-        return cpf
+        return field
+    }
+
+    fun readCpf(maxInputTries: Int = 3): String? {
+        return readUserInfo(maxInputTries, "cpf") {
+            Validators.validateCpf(it)
+        }
     }
 
     fun readPassword(maxInputTries: Int = 3): String? {
-        var passwordInputTries = 1
-        var password: String
-        do {
-            password = Readers.readStringInput("Insert your password: ")
-            if (Validators.validatePassword(password)) {
-                break
-            }
-            if (passwordInputTries >= maxInputTries) {
-                printErrorMessage("Invalid password provided $maxInputTries times. Returning to previous menu...")
-                return null
-            }
-            printErrorMessage("Invalid password provided")
-            passwordInputTries++
-        } while (true)
-        return password
+        return readUserInfo(maxInputTries, "password") {
+            Validators.validatePassword(it)
+        }
     }
 
+    fun readAgency(maxInputTries: Int = 3): Agency? {
+        // TODO: simplify this function
+        val agencyString = readUserInfo(maxInputTries, "agency") {
+            Validators.validateAgency(it)
+        }
+        return agencyString?.let {
+            Agency.getByFriendlyName(it)
+        }
+    }
 }

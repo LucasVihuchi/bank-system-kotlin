@@ -1,20 +1,24 @@
 import com.newbank.entities.accounts.Account
 import com.newbank.entities.accounts.CheckingAccount
 import com.newbank.entities.accounts.SavingsAccount
-import com.newbank.entities.users.*
+import com.newbank.entities.users.Director
+import com.newbank.entities.users.Manager
+import com.newbank.entities.users.President
+import com.newbank.entities.users.User
 import com.newbank.enums.AccountOperation
 import com.newbank.enums.AccountType
-import com.newbank.exceptions.*
+import com.newbank.exceptions.InsufficientBalanceException
+import com.newbank.exceptions.NegativeValueException
+import com.newbank.exceptions.NonExistentEntityException
+import com.newbank.exceptions.UnauthorizedException
 import com.newbank.interfaces.DirectorOperations
 import com.newbank.interfaces.ManagerOperations
 import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories
 import com.newbank.repositories.UserRepositories
-import com.newbank.utils.ExceptionHandlers
 import com.newbank.utils.ExceptionHandlers.printCustomExceptionMessage
 import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import com.newbank.utils.Readers
-import com.newbank.utils.Validators
 import kotlin.system.exitProcess
 
 fun main() {
@@ -48,6 +52,35 @@ fun handleMainMenu(option: Int) {
 }
 
 fun registerNewAccount() {
+    while (true) {
+        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), "Choose which type of account you want:")
+        handleAccountCreation(selectedOption)
+    }
+}
+
+fun handleAccountCreation(selectedOption: Int) {
+    if (selectedOption < 0 || selectedOption > 2) {
+        printErrorMessage("Invalid value provided. Returning to the beginning...")
+        return
+    }
+    if (selectedOption == 0) {
+        exitProcess(0)
+    }
+
+    val cpf = Readers.readCpf(3)
+    val agency = Readers.readAgency(3)
+
+
+    cpf?.let {
+        try {
+            val user = UserRepositories.getUser(cpf)
+        } catch (e: NonExistentEntityException) {
+            handleUserCreation(cpf)
+        }
+    }
+}
+
+fun handleUserCreation(cpf: String) {
     TODO("Not yet implemented")
 }
 

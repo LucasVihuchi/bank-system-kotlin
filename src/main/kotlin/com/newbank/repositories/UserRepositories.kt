@@ -8,11 +8,11 @@ import com.newbank.exceptions.NonExistentEntityException
 object UserRepositories {
     private var usersMap: HashMap<String, User> = HashMap()
 
-    fun isUserRegistered(cpf: String): Boolean {
+    private fun isUserRegistered(cpf: String): Boolean {
         return usersMap.containsKey(cpf)
     }
 
-    fun isPresidentRegistered(cpf: String): Boolean {
+    fun isPresidentRegistered(): Boolean {
         return usersMap.any { it.value is President }
     }
 
@@ -24,10 +24,7 @@ object UserRepositories {
     }
 
     fun getUser(cpf: String): User {
-        if (!isUserRegistered(cpf)) {
-            throw NonExistentEntityException()
-        }
-        return usersMap[cpf]!!
+        return usersMap[cpf] ?: throw NonExistentEntityException()
     }
 
     fun getUsers(): List<User> {

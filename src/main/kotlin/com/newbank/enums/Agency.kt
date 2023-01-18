@@ -17,10 +17,11 @@ enum class Agency(val id: Int, val friendlyName: String) {
         }
 
         fun getByFriendlyName(name: String): Agency {
-            for (agency in values()) {
-                if (agency.friendlyName == name) {
-                    return agency
-                }
+            val agency = values().find {
+                it.friendlyName == name
+            }
+            agency?.let {
+                return it
             }
             throw EnumNotFoundException()
         }

@@ -1,5 +1,8 @@
 package com.newbank.utils
 
+import com.newbank.enums.Agency
+import com.newbank.exceptions.EnumNotFoundException
+
 class Validators {
 
     companion object {
@@ -8,8 +11,8 @@ class Validators {
                 return false
             }
 
-            val digits: Array<Int> = Array(11, { i -> cpf[i].digitToInt() })
-            var areCharactersEqual: Boolean = true
+            val digits: Array<Int> = Array(11) { i -> cpf[i].digitToInt() }
+            var areCharactersEqual = true
             for (index in 0 until 11) {
                 if (index > 0) {
                     if (digits[index] != digits[index - 1]) {
@@ -21,7 +24,7 @@ class Validators {
                 return false
             }
 
-            var firstDigitSumVerification: Int = 0
+            var firstDigitSumVerification = 0
             for (index in 0 until 9) {
                 firstDigitSumVerification += digits[index] * (10 - index)
             }
@@ -33,7 +36,7 @@ class Validators {
                 return false
             }
 
-            var secondDigitSumVerification: Int = 0
+            var secondDigitSumVerification = 0
             for (index in 0 until 10) {
                 secondDigitSumVerification += digits[index] * (11 - index)
             }
@@ -50,6 +53,15 @@ class Validators {
 
         fun validatePassword(password: String?): Boolean {
             return password is String && password.length >= 5
+        }
+
+        fun validateAgency(name: String): Boolean {
+            try {
+                Agency.getByFriendlyName(name)
+            } catch (e: EnumNotFoundException) {
+                return false
+            }
+            return true
         }
     }
 }
