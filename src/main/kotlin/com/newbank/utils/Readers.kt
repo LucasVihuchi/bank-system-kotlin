@@ -6,7 +6,7 @@ import printStandardInputErrorMessage
 import java.util.*
 
 object Readers {
-    fun readStringInput(message: String): String {
+    private fun readStringInput(message: String): String {
         while (true) {
             print(message)
             val userInput: String? = readlnOrNull()
@@ -81,6 +81,12 @@ object Readers {
         return field
     }
 
+    fun readFullName(maxInputTries: Int = 3): String? {
+        return readUserInfo(maxInputTries, "full name") {
+            Validators.validateFullName(it)
+        }
+    }
+
     fun readCpf(maxInputTries: Int = 3): String? {
         return readUserInfo(maxInputTries, "cpf") {
             Validators.validateCpf(it)
@@ -89,6 +95,12 @@ object Readers {
 
     fun readPassword(maxInputTries: Int = 3): String? {
         return readUserInfo(maxInputTries, "password") {
+            Validators.validatePassword(it)
+        }
+    }
+
+    fun readAdminPassword(maxInputTries: Int = 3): String? {
+        return readUserInfo(maxInputTries, "admin password") {
             Validators.validatePassword(it)
         }
     }

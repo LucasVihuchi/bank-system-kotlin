@@ -4,7 +4,7 @@ import com.newbank.exceptions.EnumNotFoundException
 
 enum class Position(val id: Int, val friendlyName: String) {
     MANAGER(1, "Manager"),
-    DIRECTOR(2, "DireCtor"),
+    DIRECTOR(2, "Director"),
     PRESIDENT(3, "President");
 
     companion object {
@@ -25,5 +25,11 @@ enum class Position(val id: Int, val friendlyName: String) {
             }
             throw EnumNotFoundException()
         }
+
+        fun getFriendlyNames(): Array<String> {
+            return values().map { it.friendlyName }.toTypedArray()
+        }
+
+
     }
 }

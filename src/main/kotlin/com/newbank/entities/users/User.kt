@@ -1,8 +1,8 @@
 package com.newbank.entities.users
 
-import com.newbank.utils.Validators.Companion.validateCpf
 import com.newbank.exceptions.IncorrectInfoException
 import com.newbank.exceptions.UnauthorizedException
+import com.newbank.utils.Validators.Companion.validateCpf
 
 abstract class User(var name: String, cpf: String, private var password: String) {
     val cpf: String = if (validateCpf(cpf)) cpf else throw IncorrectInfoException()

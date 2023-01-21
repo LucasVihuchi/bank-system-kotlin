@@ -51,12 +51,25 @@ class Validators {
             return true
         }
 
+        fun validateFullName(fullName: String?): Boolean {
+            return fullName?.let {
+                it.contains(" ") && it.length > 2
+            } ?: false
+        }
+
         fun validatePassword(password: String?): Boolean {
             return password is String && password.length >= 5
         }
 
-        fun validateAgency(name: String): Boolean {
+        fun validateAdminPassword(password: String?): Boolean {
+            return password is String && password == ADMIN_PASSWORD
+        }
+
+        fun validateAgency(name: String?): Boolean {
             try {
+                if (name === null) {
+                    return false
+                }
                 Agency.getByFriendlyName(name)
             } catch (e: EnumNotFoundException) {
                 return false

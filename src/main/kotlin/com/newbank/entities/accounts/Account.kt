@@ -4,7 +4,6 @@ import com.newbank.enums.AccountType
 import com.newbank.enums.Agency
 import com.newbank.exceptions.InsufficientBalanceException
 import com.newbank.exceptions.NegativeValueException
-import com.newbank.exceptions.NonExistentEntityException
 import com.newbank.interfaces.AccountTaxes
 import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories

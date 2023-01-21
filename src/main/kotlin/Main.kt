@@ -1,12 +1,10 @@
 import com.newbank.entities.accounts.Account
 import com.newbank.entities.accounts.CheckingAccount
 import com.newbank.entities.accounts.SavingsAccount
-import com.newbank.entities.users.Director
-import com.newbank.entities.users.Manager
-import com.newbank.entities.users.President
-import com.newbank.entities.users.User
+import com.newbank.entities.users.*
 import com.newbank.enums.AccountOperation
 import com.newbank.enums.AccountType
+import com.newbank.enums.Position
 import com.newbank.exceptions.InsufficientBalanceException
 import com.newbank.exceptions.NegativeValueException
 import com.newbank.exceptions.NonExistentEntityException
@@ -16,6 +14,7 @@ import com.newbank.interfaces.ManagerOperations
 import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories
 import com.newbank.repositories.UserRepositories
+import com.newbank.utils.ADMIN_PASSWORD
 import com.newbank.utils.ExceptionHandlers.printCustomExceptionMessage
 import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import com.newbank.utils.Readers
@@ -53,40 +52,110 @@ fun handleMainMenu(option: Int) {
 
 fun registerNewAccount() {
     while (true) {
-        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), "Choose which type of account you want:")
-        handleAccountCreation(selectedOption)
+        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), message = "Choose which type of account you want:")
+        if (handleAccountCreation(selectedOption)) {
+            break
+        }
     }
 }
 
-fun handleAccountCreation(selectedOption: Int) {
+fun handleAccountCreation(selectedOption: Int) : Boolean {
     if (selectedOption < 0 || selectedOption > 2) {
         printErrorMessage("Invalid value provided. Returning to the beginning...")
-        return
+        return false
     }
     if (selectedOption == 0) {
         exitProcess(0)
     }
 
-    val cpf = Readers.readCpf(3)
-    val agency = Readers.readAgency(3)
+    val cpf = Readers.readCpf(3) ?: return false
+    val agency = Readers.readAgency(3) ?: return false
 
+    val user: User = try {
+        UserRepositories.getUser(cpf)
+    } catch (e: NonExistentEntityException) {
+        printErrorMessage("User not found on the system")
+        handleUserCreation(cpf) ?: return false
+    }
 
-    cpf?.let {
-        try {
-            val user = UserRepositories.getUser(cpf)
-        } catch (e: NonExistentEntityException) {
-            handleUserCreation(cpf)
+    val password = Readers.readPassword(3) ?: return false
+    try {
+        user.login(password)
+    } catch (e: UnauthorizedException) {
+        printCustomExceptionMessage(e)
+        return false
+    }
+
+    when (selectedOption) {
+        1 -> {
+            val account = CheckingAccount(user.cpf, agency)
+            printAccountCreatedMessage(AccountType.CHECKING.friendlyName)
+            CheckingAccountRepositories.addAccount(account)
+        }
+        2 -> {
+            val account = SavingsAccount(user.cpf, agency)
+            printAccountCreatedMessage(AccountType.SAVINGS.friendlyName)
+            SavingsAccountRepositories.addAccount(account)
         }
     }
+    return true
+
 }
 
-fun handleUserCreation(cpf: String) {
-    TODO("Not yet implemented")
+fun handleUserCreation(cpf: String): User? {
+    val userTypes: Array<String> = arrayOf("Customer", *Position.getFriendlyNames())
+    val selectedOption = Readers.readOptionsInput(*userTypes, message = "Select which user type you want to create:")
+
+    if (selectedOption == 0) {
+        exitProcess(0)
+    } else if (selectedOption == 4 && UserRepositories.isPresidentRegistered()) {
+        printErrorMessage("President is already registered. Returning to previous menu")
+        return null
+    }
+
+    val fullName = Readers.readFullName(3) ?: return null
+    val password = Readers.readPassword(3) ?: return null
+
+    val user: User
+    if (selectedOption == 1) {
+        user = Customer(fullName, cpf, password)
+        UserRepositories.addUser(user)
+        printUserCreatedMessage("Customer")
+        println("\nReturning to account creation menu\n")
+        return user
+    }
+
+    // Just to assure admin password is provided correctly
+    Readers.readAdminPassword(3) ?: return null
+
+    when (selectedOption) {
+        2 -> {
+            val agency = Readers.readAgency(3) ?: return null
+            user = Manager(fullName, cpf, password, agency)
+            UserRepositories.addUser(user)
+            printUserCreatedMessage(Position.MANAGER.friendlyName)
+        }
+        3 -> {
+            user = Director(fullName, cpf, password)
+            UserRepositories.addUser(user)
+            printUserCreatedMessage(Position.DIRECTOR.friendlyName)
+        }
+        4 -> {
+            user = President(fullName, cpf, password)
+            UserRepositories.addUser(user)
+            printUserCreatedMessage(Position.DIRECTOR.friendlyName)
+        }
+        else -> {
+            return null
+        }
+    }
+    println("\nReturning to account creation menu\n")
+    return user
 }
 
 fun initializeATM(user: User) {
     while (true) {
-        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), "Choose which type of account you want:")
+        val selectedOption: Int = Readers.readOptionsInput(*AccountType.getFriendlyNames(), message = "Choose which type of account you want:")
         handleAccountSelectionMenu(selectedOption, user)
     }
 }
@@ -313,6 +382,14 @@ fun loadRepositories() {
 
 fun printStandardInputErrorMessage() {
     printErrorMessage("Incorrect input provided, please try again")
+}
+
+fun printUserCreatedMessage(userType: String) {
+    println("$userType registered sucessfully")
+}
+
+fun printAccountCreatedMessage(accountType: String) {
+    println("$accountType account created sucessfully")
 }
 
 fun readInitialMainMenuOption(account: Account, user: User): Int {

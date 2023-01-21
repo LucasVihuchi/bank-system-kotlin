@@ -12,11 +12,11 @@ object CheckingAccountRepositories {
         return accountsMap.containsKey(cpf)
     }
 
-    fun addAccount(savingsAccount: CheckingAccount) {
-        if(isAccountRegistered(savingsAccount.cpfOwner)) {
+    fun addAccount(checkingAccount: CheckingAccount) {
+        if(isAccountRegistered(checkingAccount.cpfOwner)) {
             throw ExistentEntityException()
         }
-        accountsMap[savingsAccount.cpfOwner] = savingsAccount
+        accountsMap[checkingAccount.cpfOwner] = checkingAccount
     }
 
     fun getAccount(cpf: String): CheckingAccount {
