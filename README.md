@@ -26,9 +26,24 @@ The following technologies were used on this project:
 
 ## Prerequisites
 
-- [Kotlin](https://github.com/JetBrains/kotlin/tree/master) (v1.8 or newer)
+- [Kotlin](https://github.com/JetBrains/kotlin/tree/master) (v1.7 or newer)
 - [SQLite](https://www.sqlite.org/download.html) (v3.x or newer)
+- [Gradle](https://gradle.org/install/) (v7.6 or newer)
 
 ## IDE
 
 You can run this project through your prefered IDE by openning `/src/main/kotlin/Main.kt` file and clicking on `run "Main.kt"` on context menu.
+
+## CLI
+
+If you want to run this project through CLI, first you have to build the project running the following command on this project base folder:
+
+```sh
+gradle build
+```
+
+Then start the application by running:
+
+```sh
+gradle run
+```
