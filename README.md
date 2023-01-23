@@ -9,8 +9,8 @@ Proof of concept project to learn Kotlin Fundamental Concepts. This project emul
 - [ ] Life insurance
 - [ ] Manager - Account number by agency report
 - [ ] Director - Customer bank info report
-- [ ] Presidrent - Bank capital report
-- [ ] Database Persistence
+- [ ] President - Bank capital report
+- [ ] File Persistence
 
 ## 🛠 Techonologies
 
@@ -18,8 +18,6 @@ The following technologies were used on this project:
 
 <div>
   <img src="https://img.shields.io/static/v1?label=Kotlin&message=Kotlin Language&color=blue&style=for-the-badge&logo=Kotlin"/>
-  <br><br>
-  <img src="https://img.shields.io/static/v1?label=SQLite&message=SQLite Database&color=07405E&style=for-the-badge&logo=SQLite"/>
 </div>
 
 ## Running this project
@@ -27,7 +25,6 @@ The following technologies were used on this project:
 ## Prerequisites
 
 - [Kotlin](https://github.com/JetBrains/kotlin/tree/master) (v1.7 or newer)
-- [SQLite](https://www.sqlite.org/download.html) (v3.x or newer)
 - [Gradle](https://gradle.org/install/) (v7.6 or newer)
 
 ## IDE

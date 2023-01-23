@@ -75,6 +75,8 @@ outTmp/
 kotlin-ide/
 libs/
 lib/
+**/databases/
+
 
 # gradle
 .gradle

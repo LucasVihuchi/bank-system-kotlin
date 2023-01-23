@@ -1,3 +1,4 @@
+import com.newbank.clients.FilesClient
 import com.newbank.entities.accounts.Account
 import com.newbank.entities.accounts.CheckingAccount
 import com.newbank.entities.accounts.SavingsAccount
@@ -14,14 +15,15 @@ import com.newbank.interfaces.ManagerOperations
 import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories
 import com.newbank.repositories.UserRepositories
-import com.newbank.utils.ADMIN_PASSWORD
 import com.newbank.utils.ExceptionHandlers.printCustomExceptionMessage
 import com.newbank.utils.ExceptionHandlers.printErrorMessage
 import com.newbank.utils.Readers
 import kotlin.system.exitProcess
 
 fun main() {
-    loadRepositories()
+    FilesClient.initializeProject(true)
+    FilesClient.loadRepositories()
+
 
     while (true) {
         println("Welcome, User")
@@ -37,12 +39,15 @@ fun handleMainMenu(option: Int) {
             val user: User = login() ?: return
             initializeATM(user)
         }
+
         2 -> {
             registerNewAccount()
         }
+
         0 -> {
             exitProcess(0)
         }
+
         else -> {
             printErrorMessage("Invalid value provided. Returning to the beginning...")
             return
@@ -92,6 +97,7 @@ fun handleAccountCreation(selectedOption: Int) : Boolean {
             printAccountCreatedMessage(AccountType.CHECKING.friendlyName)
             CheckingAccountRepositories.addAccount(account)
         }
+
         2 -> {
             val account = SavingsAccount(user.cpf, agency)
             printAccountCreatedMessage(AccountType.SAVINGS.friendlyName)
@@ -135,16 +141,19 @@ fun handleUserCreation(cpf: String): User? {
             UserRepositories.addUser(user)
             printUserCreatedMessage(Position.MANAGER.friendlyName)
         }
+
         3 -> {
             user = Director(fullName, cpf, password)
             UserRepositories.addUser(user)
             printUserCreatedMessage(Position.DIRECTOR.friendlyName)
         }
+
         4 -> {
             user = President(fullName, cpf, password)
             UserRepositories.addUser(user)
             printUserCreatedMessage(Position.DIRECTOR.friendlyName)
         }
+
         else -> {
             return null
         }
@@ -165,12 +174,15 @@ fun handleAccountSelectionMenu(option: Int, user: User) {
         1 -> {
             AccountType.CHECKING
         }
+
         2 -> {
             AccountType.CHECKING
         }
+
         0 -> {
             exitProcess(0)
         }
+
         else -> {
             printErrorMessage("Invalid value provided. Returning to the beginning...")
             return
@@ -191,6 +203,7 @@ fun getAccount(cpf: String, accountType: AccountType): Account? {
             AccountType.CHECKING -> {
                 CheckingAccountRepositories.getAccount(cpf)
             }
+
             AccountType.SAVINGS -> {
                 SavingsAccountRepositories.getAccount(cpf)
             }
@@ -223,9 +236,11 @@ fun handleOperation(operation: AccountOperation, account: Account, recipientAcco
             AccountOperation.WITHDRAW -> {
                 account.withdraw(handledValue)
             }
+
             AccountOperation.DEPOSIT -> {
                 account.deposit(handledValue)
             }
+
             AccountOperation.TRANSFER -> {
                 account.transfer(handledValue, recipientCpf, recipientAccountType)
             }
@@ -243,9 +258,11 @@ fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOp
         1 -> {
             handleOperation(AccountOperation.WITHDRAW, account)
         }
+
         2 -> {
             handleOperation(AccountOperation.DEPOSIT, account)
         }
+
         3 -> {
             val recipientCpf: String = Readers.readCpf() ?: return
 
@@ -262,33 +279,41 @@ fun generateCheckingAccountMenu(account: CheckingAccount, user: User, selectedOp
 
             handleOperation(AccountOperation.TRANSFER, account, accountType, recipientCpf)
         }
+
         4 -> {
             account.printBalance()
         }
+
         5 -> {
             account.generateTaxationReport()
         }
+
         6 -> {
             TODO("Life insurance")
         }
+
         7 -> {
             if (user is ManagerOperations) {
                 user.generateAccountNumberReport()
             }
         }
+
         8 -> {
             if (user is DirectorOperations) {
                 user.generateBankCustomerReport()
             }
         }
+
         9 -> {
             if (user is President) {
                 user.generateBankStockReport()
             }
         }
+
         0 -> {
             exitProcess(0)
         }
+
         else -> {
             printErrorMessage("Invalid value provided. Returning to the beginning...")
             return
@@ -301,9 +326,11 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
         1 -> {
             handleOperation(AccountOperation.WITHDRAW, account)
         }
+
         2 -> {
             handleOperation(AccountOperation.DEPOSIT, account)
         }
+
         3 -> {
             val recipientCpf: String = Readers.readCpf() ?: return
 
@@ -320,30 +347,37 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
 
             handleOperation(AccountOperation.TRANSFER, account, accountType, recipientCpf)
         }
+
         4 -> {
             account.printBalance()
         }
+
         5 -> {
             account.generateIncomeSimulation()
         }
+
         6 -> {
             if (user is ManagerOperations) {
                 user.generateAccountNumberReport()
             }
         }
+
         7 -> {
             if (user is DirectorOperations) {
                 user.generateBankCustomerReport()
             }
         }
+
         8 -> {
             if (user is President) {
                 user.generateBankStockReport()
             }
         }
+
         0 -> {
             exitProcess(0)
         }
+
         else -> {
             printErrorMessage("Invalid value provided. Returning to the beginning...")
             return
@@ -372,12 +406,6 @@ fun login(): User? {
     }
 
     return loggedUser
-}
-
-fun loadRepositories() {
-    UserRepositories.usersLoader()
-    CheckingAccountRepositories.accountsLoader()
-    SavingsAccountRepositories.accountsLoader()
 }
 
 fun printStandardInputErrorMessage() {

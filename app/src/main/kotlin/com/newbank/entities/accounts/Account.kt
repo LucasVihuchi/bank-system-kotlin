@@ -9,9 +9,7 @@ import com.newbank.repositories.CheckingAccountRepositories
 import com.newbank.repositories.SavingsAccountRepositories
 import java.time.LocalDate
 
-abstract class Account(var cpfOwner: String, val agency: Agency) {
-    protected var balance: Double = 0.0
-
+abstract class Account(var cpfOwner: String, val agency: Agency, var balance: Double = 0.0) {
     fun withdraw(amount: Double) {
         if (amount <= 0) {
             throw NegativeValueException()

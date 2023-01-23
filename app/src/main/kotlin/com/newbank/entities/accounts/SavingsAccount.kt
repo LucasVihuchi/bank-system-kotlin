@@ -6,7 +6,8 @@ import com.newbank.interfaces.AccountAttributes
 import com.newbank.interfaces.AccountTaxes
 import java.time.LocalDate
 
-class SavingsAccount(cpfOwner: String, agency: Agency, accountBirth: Int = -1): Account(cpfOwner, agency) {
+class SavingsAccount(cpfOwner: String, agency: Agency, accountBirth: Int = -1, balance: Double = 0.0) :
+    Account(cpfOwner, agency, balance) {
 
     var accountBirth: Int = accountBirth
         internal set

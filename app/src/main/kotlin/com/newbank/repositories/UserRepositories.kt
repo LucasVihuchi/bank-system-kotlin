@@ -1,7 +1,7 @@
 package com.newbank.repositories
 
-import com.newbank.entities.users.*
-import com.newbank.enums.Agency
+import com.newbank.entities.users.President
+import com.newbank.entities.users.User
 import com.newbank.exceptions.ExistentEntityException
 import com.newbank.exceptions.NonExistentEntityException
 
@@ -31,10 +31,5 @@ object UserRepositories {
         return ArrayList<User>(usersMap.values)
     }
 
-    fun usersLoader() {
-        addUser(Customer("Ronald MacDonald", "93465029089", "123456"))
-        addUser(Manager("Cristiano Ronaldo", "43643733038", "abc-123", Agency.A0001))
-        addUser(Director("Pato Donald", "80930608046", "789789"))
-        addUser(President("Caçar Pato, caçar coelho", "12848534036", "poipoi"))
-    }
+
 }
