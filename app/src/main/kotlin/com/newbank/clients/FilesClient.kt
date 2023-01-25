@@ -2,7 +2,10 @@ package com.newbank.clients
 
 import com.newbank.entities.accounts.CheckingAccount
 import com.newbank.entities.accounts.SavingsAccount
+import com.newbank.entities.transactions.Transaction
 import com.newbank.entities.users.*
+import com.newbank.enums.AccountOperation
+import com.newbank.enums.AccountType
 import com.newbank.enums.Agency
 import com.newbank.exceptions.UnknownEntityException
 import com.newbank.mocks.EntitiesMocks
@@ -98,87 +101,93 @@ object FilesClient {
     private fun loadUsers() {
         val users = File(DATABASE_FOLDER + File.separator + "users.txt")
         val reader = BufferedReader(FileReader(users))
-        try {
-            reader.lines().forEach {
-                val usersInfo: List<String> = it.split("¨¨")
-                val name = usersInfo[1]
-                val cpf = usersInfo[2]
-                val password = usersInfo[3]
-                val agencyFriendlyName = usersInfo[4]
-                val user: User = when (usersInfo[0]) {
-                    "c" -> {
-                        Customer(name, cpf, password)
-                    }
+        reader.use { r ->
+            try {
+                r.lines().forEach {
+                    val usersInfo: List<String> = it.split("¨¨")
+                    val name = usersInfo[1]
+                    val cpf = usersInfo[2]
+                    val password = usersInfo[3]
+                    val agencyFriendlyName = usersInfo[4]
+                    val user: User = when (usersInfo[0]) {
+                        "c" -> {
+                            Customer(name, cpf, password)
+                        }
 
-                    "m" -> {
-                        Manager(name, cpf, password, Agency.getByFriendlyName(agencyFriendlyName))
-                    }
+                        "m" -> {
+                            Manager(name, cpf, password, Agency.getByFriendlyName(agencyFriendlyName))
+                        }
 
-                    "d" -> {
-                        Director(name, cpf, password)
-                    }
+                        "d" -> {
+                            Director(name, cpf, password)
+                        }
 
-                    "p" -> {
-                        President(name, cpf, password)
-                    }
+                        "p" -> {
+                            President(name, cpf, password)
+                        }
 
-                    else -> {
-                        throw UnknownEntityException()
+                        else -> {
+                            throw UnknownEntityException()
+                        }
                     }
+                    UserRepositories.addUser(user)
                 }
-                UserRepositories.addUser(user)
+            } catch (e: Exception) {
+                ExceptionHandlers.printErrorMessage("Error while reading users file")
+                exitProcess(1)
             }
-        } catch (e: Exception) {
-            ExceptionHandlers.printErrorMessage("Error while reading users file")
-            exitProcess(1)
         }
     }
 
     private fun loadCheckingAccounts() {
         val checkingAccounts = File(DATABASE_FOLDER + File.separator + "checkingAccounts.txt")
         val reader = BufferedReader(FileReader(checkingAccounts))
-        try {
-            reader.lines().forEach {
-                val checkingAccountsInfo: List<String> = it.split("¨¨")
-                val cpf = checkingAccountsInfo[0]
-                val agencyFriendlyName = checkingAccountsInfo[1]
-                val balance = checkingAccountsInfo[2].toDouble()
-                CheckingAccountRepositories.addAccount(
-                    CheckingAccount(
-                        cpf,
-                        Agency.getByFriendlyName(agencyFriendlyName),
-                        balance
+        reader.use { r ->
+            try {
+                r.lines().forEach {
+                    val checkingAccountsInfo: List<String> = it.split("¨¨")
+                    val cpf = checkingAccountsInfo[0]
+                    val agencyFriendlyName = checkingAccountsInfo[1]
+                    val balance = checkingAccountsInfo[2].toDouble()
+                    CheckingAccountRepositories.addAccount(
+                        CheckingAccount(
+                            cpf,
+                            Agency.getByFriendlyName(agencyFriendlyName),
+                            balance
+                        )
                     )
-                )
+                }
+            } catch (e: Exception) {
+                ExceptionHandlers.printErrorMessage("Error while reading checking account file")
+                exitProcess(1)
             }
-        } catch (e: Exception) {
-            ExceptionHandlers.printErrorMessage("Error while reading checking account file")
-            exitProcess(1)
         }
     }
 
     private fun loadSavingsAccounts() {
         val savingsAccounts = File(DATABASE_FOLDER + File.separator + "savingsAccounts.txt")
         val reader = BufferedReader(FileReader(savingsAccounts))
-        try {
-            reader.lines().forEach {
-                val savingsAccountsInfo: List<String> = it.split("¨¨")
-                val cpf = savingsAccountsInfo[0]
-                val agencyFriendlyName = savingsAccountsInfo[1]
-                val balance = savingsAccountsInfo[2].toDouble()
-                val accountBirth = savingsAccountsInfo[3].toInt()
-                SavingsAccountRepositories.addAccount(
-                    SavingsAccount(
-                        cpf,
-                        Agency.getByFriendlyName(agencyFriendlyName),
-                        accountBirth,
-                        balance
+        reader.use { r ->
+            try {
+                r.lines().forEach {
+                    val savingsAccountsInfo: List<String> = it.split("¨¨")
+                    val cpf = savingsAccountsInfo[0]
+                    val agencyFriendlyName = savingsAccountsInfo[1]
+                    val balance = savingsAccountsInfo[2].toDouble()
+                    val accountBirth = savingsAccountsInfo[3].toInt()
+                    SavingsAccountRepositories.addAccount(
+                        SavingsAccount(
+                            cpf,
+                            Agency.getByFriendlyName(agencyFriendlyName),
+                            accountBirth,
+                            balance
+                        )
                     )
-                )
+                }
+            } catch (e: Exception) {
+                ExceptionHandlers.printErrorMessage("Error while reading checking account file")
+                exitProcess(1)
             }
-        } catch (e: Exception) {
-            ExceptionHandlers.printErrorMessage("Error while reading checking account file")
-            exitProcess(1)
         }
     }
 
@@ -193,6 +202,7 @@ object FilesClient {
         val users = File(DATABASE_FOLDER + File.separator + "users.txt")
         val checkingAccounts = File(DATABASE_FOLDER + File.separator + "checkingAccounts.txt")
         val savingsAccounts = File(DATABASE_FOLDER + File.separator + "savingsAccounts.txt")
+        val transactions = File(DATABASE_FOLDER + File.separator + "transactions.txt")
 
         try {
             if (dbFolder.mkdirs()) {
@@ -207,8 +217,82 @@ object FilesClient {
             createNewFile(savingsAccounts) {
                 if (shouldGenerateSampleData) generateSavingsAccountSampleData()
             }
+            createNewFile(transactions)
         } catch (e: Exception) {
             ExceptionHandlers.printErrorMessage("Error while setting up files")
         }
+    }
+
+    fun saveTransaction(
+        amount: Double,
+        transactionType: AccountOperation,
+        accountType: AccountType,
+        accountCpf: String,
+        destinedCpf: String? = null
+    ) {
+        val transactions = File(DATABASE_FOLDER + File.separator + "transactions.txt")
+        val writer = BufferedWriter(FileWriter(transactions, true))
+        writer.use { w ->
+            try {
+                val transactionSymbol = when (transactionType) {
+                    AccountOperation.DEPOSIT -> {
+                        "d"
+                    }
+
+                    AccountOperation.WITHDRAW -> {
+                        "w"
+                    }
+
+                    AccountOperation.TRANSFER -> {
+                        "t"
+                    }
+                }
+                w.write("$transactionSymbol¨¨$amount¨¨${if (accountType == AccountType.CHECKING) "c" else "p"}¨¨$accountCpf¨¨${destinedCpf ?: ""}")
+                w.newLine()
+            } catch (e: Exception) {
+                ExceptionHandlers.printErrorMessage("Error while saving information")
+                exitProcess(1)
+            }
+        }
+    }
+
+    fun getTransactions(): List<Transaction> {
+        val transactions = File(DATABASE_FOLDER + File.separator + "transactions.txt")
+        val reader = BufferedReader(FileReader(transactions))
+        val transactionList: MutableList<Transaction> = mutableListOf()
+        reader.use { r ->
+            try {
+                r.lines().forEach {
+                    val transactionsInfo: List<String> = it.split("¨¨")
+                    val accountOperation = when (transactionsInfo[0]) {
+                        "d" -> {
+                            AccountOperation.DEPOSIT
+                        }
+
+                        "w" -> {
+                            AccountOperation.WITHDRAW
+                        }
+
+                        "t" -> {
+                            AccountOperation.TRANSFER
+                        }
+
+                        else -> {
+                            throw UnknownEntityException()
+                        }
+                    }
+                    val amount = transactionsInfo[1].toDouble()
+                    val accountType: AccountType =
+                        if (transactionsInfo[2] == "c") AccountType.CHECKING else AccountType.SAVINGS
+                    val accountCpf = transactionsInfo[3]
+                    val recipientCpf = if (transactionsInfo[4] == "") transactionsInfo[4] else null
+                    transactionList.add(Transaction(amount, accountOperation, accountType, accountCpf, recipientCpf))
+                }
+            } catch (e: Exception) {
+                ExceptionHandlers.printErrorMessage("Error while reading transaction information")
+                exitProcess(1)
+            }
+        }
+        return transactionList
     }
 }

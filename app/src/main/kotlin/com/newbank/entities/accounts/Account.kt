@@ -1,5 +1,7 @@
 package com.newbank.entities.accounts
 
+import com.newbank.clients.FilesClient
+import com.newbank.enums.AccountOperation
 import com.newbank.enums.AccountType
 import com.newbank.enums.Agency
 import com.newbank.exceptions.InsufficientBalanceException
@@ -18,6 +20,8 @@ abstract class Account(var cpfOwner: String, val agency: Agency, var balance: Do
             throw InsufficientBalanceException()
         }
         this.balance -= (amount + AccountTaxes.WITHDRAW)
+        val accountType = if (this is CheckingAccount) AccountType.CHECKING else AccountType.SAVINGS
+        FilesClient.saveTransaction(amount, AccountOperation.WITHDRAW, accountType, cpfOwner)
     }
 
     open fun deposit(amount: Double) {
@@ -28,6 +32,8 @@ abstract class Account(var cpfOwner: String, val agency: Agency, var balance: Do
             throw InsufficientBalanceException()
         }
         this.balance += (amount - AccountTaxes.DEPOSIT)
+        val accountType = if (this is CheckingAccount) AccountType.CHECKING else AccountType.SAVINGS
+        FilesClient.saveTransaction(amount, AccountOperation.DEPOSIT, accountType, cpfOwner)
     }
 
     fun transfer(amount: Double, recipientCpf: String, accountType: AccountType) {
@@ -41,6 +47,7 @@ abstract class Account(var cpfOwner: String, val agency: Agency, var balance: Do
             AccountType.CHECKING -> {
                 CheckingAccountRepositories.getAccount(recipientCpf)
             }
+
             AccountType.SAVINGS -> {
                 SavingsAccountRepositories.getAccount(recipientCpf)
             }
@@ -50,13 +57,11 @@ abstract class Account(var cpfOwner: String, val agency: Agency, var balance: Do
         }
         this.balance -= (amount + AccountTaxes.TRANSFER)
         account.balance += amount
+        val currentAccountType = if (this is CheckingAccount) AccountType.CHECKING else AccountType.SAVINGS
+        FilesClient.saveTransaction(amount, AccountOperation.TRANSFER, currentAccountType, cpfOwner, recipientCpf)
     }
 
     fun printBalance() {
         println("\nCurrent balance on account: $ ${String.format("%.2f", this.balance)}\n")
-    }
-
-    fun saveTransaction(amount: Double, transactionType: String, destinedCpf: String) {
-        TODO("Implement when repositories are finished")
     }
 }
