@@ -76,5 +76,14 @@ class Validators {
             }
             return true
         }
+
+        fun validateSimulationPeriod(periodInDays: String): Boolean {
+            return try {
+                val periodInDaysNumber = periodInDays.toInt()
+                periodInDaysNumber >= 30
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 }

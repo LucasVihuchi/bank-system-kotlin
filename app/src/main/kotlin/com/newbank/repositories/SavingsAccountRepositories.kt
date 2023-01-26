@@ -7,7 +7,7 @@ import com.newbank.exceptions.NonExistentEntityException
 object SavingsAccountRepositories {
     private var accountsMap: HashMap<String, SavingsAccount> = HashMap()
 
-    fun isAccountRegistered(cpf: String): Boolean {
+    private fun isAccountRegistered(cpf: String): Boolean {
         return accountsMap.containsKey(cpf)
     }
 

@@ -230,7 +230,7 @@ fun handleInitialMainMenu(account: Account, user: User) {
 }
 
 fun handleOperation(operation: AccountOperation, account: Account, recipientAccountType: AccountType = AccountType.CHECKING, recipientCpf: String = "") {
-    val handledValue: Double = Readers.readDoubleInput("Insert the value to be ${operation.pastParticipleTense}:")
+    val handledValue: Double = Readers.readDoubleInput("Insert the value to be ${operation.pastParticipleTense}: ")
     try {
         when (operation) {
             AccountOperation.WITHDRAW -> {
@@ -353,7 +353,9 @@ fun generateSavingsAccountMenu(account: SavingsAccount, user: User, selectedOpti
         }
 
         5 -> {
-            account.generateIncomeSimulation()
+            val simulationPeriod: Int = Readers.readSimulationPeriod(3) ?: return
+            val value: Double = Readers.readDoubleInput("Insert the value to be simulated: ")
+            account.generateIncomeSimulation(value, simulationPeriod)
         }
 
         6 -> {

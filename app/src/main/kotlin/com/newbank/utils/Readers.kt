@@ -19,7 +19,7 @@ object Readers {
         }
     }
 
-    fun readIntInput(message: String): Int {
+    private fun readIntInput(message: String): Int {
         while (true) {
             val userInput: String = readStringInput(message)
             try {
@@ -113,5 +113,11 @@ object Readers {
         return agencyString?.let {
             Agency.getByFriendlyName(it)
         }
+    }
+
+    fun readSimulationPeriod(maxInputTries: Int = 3): Int? {
+        return readUserInfo(maxInputTries, "simulation period in days") {
+            Validators.validateSimulationPeriod(it)
+        }?.toInt()
     }
 }

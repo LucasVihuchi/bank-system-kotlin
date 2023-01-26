@@ -40,7 +40,8 @@ class CheckingAccount(cpfOwner: String, agency: Agency, balance: Double = 0.0) :
             }
         }
 
-        val reportFile = File(DATABASE_FOLDER + File.separator + cpfOwner + " " + currentTime.hashCode() + ".txt")
+        val reportFile =
+            File(DATABASE_FOLDER + File.separator + "trs" + cpfOwner + " " + currentTime.hashCode() + ".txt")
         val writer = BufferedWriter(FileWriter(reportFile, true))
         try {
             writer.use { w ->

@@ -9,5 +9,4 @@ data class Transaction(
     val accountType: AccountType,
     val accountCpf: String,
     val destinedCpf: String?
-) {
-}
+)
